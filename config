@@ -1,0 +1,10 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = true
+	symlinks = false
+	ignorecase = true
+	hideDotFiles = dotGitOnly
+[remote "test"]
+	url = https://github.com/iqbal1980/IqLearn.git
+	fetch = +refs/heads/*:refs/remotes/test/*
