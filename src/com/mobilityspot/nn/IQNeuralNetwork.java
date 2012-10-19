@@ -59,12 +59,10 @@ public class IQNeuralNetwork {
 			throw new Exception("Input or output size not matching first and/or last layers");
 		} else {
 			
-			for(int i = 0; i < 1000 ; i++) { //100 = training iterations
+			for(int i = 0; i < 10000 ; i++) { //10000 = training iterations
 				
 				for(int j = 0; j < this.inputs.length; j++) {
-					/*for(IQNode node : layers.getFirst().getNodes()) {
-						node.setValue(this.input[0]);
-					}*/
+					getNetworkOutput(inputs[j]);
 				}
 				
 			}
@@ -74,6 +72,18 @@ public class IQNeuralNetwork {
 		}
 	}
 	
+	public double  getNetworkOutput(double[] inputsValues) {
+		layers.getFirst().updateNodesValues(inputsValues);
+		double newValue = layers.getFirst().getLayerOutput();
+
+		for(int i = 1; i < layers.size(); i++) {
+			layers.get(i).updateNodesValues(newValue);
+			newValue = layers.get(i).getLayerOutput();
+		}
+		System.out.println(newValue);
+		return newValue;
+	}
+
 	public void printNNStructure() {
 		for(IQLayer layer : layers) {
 			System.out.println("layer **************"+ layers.indexOf(layer));

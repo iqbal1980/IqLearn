@@ -44,7 +44,27 @@ public class IQLayer {
 		}
 	}
 	
-	public void updateNodesWeight() {
-		
+	public void updateNodesValues(double sameValue) {
+		int i = 0;
+		for(IQNode node : nodes) {
+			node.setValue(sameValue);
+			i++;
+		}
+	}
+	
+	public void updateNodesWeight(double[] weights) {
+		int i = 0;
+		for(IQNode node : nodes) {
+			node.setValue(weights[i]);
+			i++;
+		}
+	}
+	
+	public void updateNodesWeight(double sameWeights) {
+		int i = 0;
+		for(IQNode node : nodes) {
+			node.setValue(sameWeights);
+			i++;
+		}
 	}
 }
