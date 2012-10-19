@@ -1,5 +1,6 @@
 package com.mobilityspot.nn;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class IQNeuralNetwork {
@@ -59,30 +60,47 @@ public class IQNeuralNetwork {
 			throw new Exception("Input or output size not matching first and/or last layers");
 		} else {
 			
-			for(int i = 0; i < 10000 ; i++) { //10000 = training iterations
+			//for(int i = 0; i < 10000 ; i++) { //10000 = training iterations
 				
 				for(int j = 0; j < this.inputs.length; j++) {
-					getNetworkOutput(inputs[j]);
+					
+					System.out.println(getNetworkOutput(inputs[j])[0]);
+					
 				}
 				
-			}
-			
-			
+			//}	
 			
 		}
 	}
 	
-	public double  getNetworkOutput(double[] inputsValues) {
+	public double[]  getNetworkOutput(double[] inputsValues) {
 		layers.getFirst().updateNodesValues(inputsValues);
 		double newValue = layers.getFirst().getLayerOutput();
 
-		for(int i = 1; i < layers.size(); i++) {
+		for(int i = 1; i < layers.size() - 1; i++) {
 			layers.get(i).updateNodesValues(newValue);
 			newValue = layers.get(i).getLayerOutput();
 		}
-		System.out.println(newValue);
-		return newValue;
+		
+		
+		layers.getLast().updateNodesValues(newValue);
+		
+		/*for(IQNode myNode : layers.getLast().getNodes()) {
+			myNode.setValue(newValue);
+		}*/
+		
+		int j = 0;
+		double[] returnLastLayerValues = new double[expectedOutputs.length];
+
+		for(IQNode myNode2 : layers.getLast().getNodes()) {
+			returnLastLayerValues[j] = myNode2.getValue() * myNode2.getWeight();
+			j++;
+		}
+		
+		return returnLastLayerValues;
 	}
+	
+	
 
 	public void printNNStructure() {
 		for(IQLayer layer : layers) {
