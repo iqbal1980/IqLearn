@@ -91,13 +91,11 @@ public class IQNeuralNetwork {
 		//displayInputs();
 		//displayOutputs();
 		//printNNStructure();
-		double[] toto = null;
+		double[] netWorkOutPut = null;
 		for(int i = 0; i < 1  ; i++) { //training iterations
 			for(int j = 0; j<1/*inputs.length*/;j++) {
-				toto = getNetworkOutput(inputs[j]);
-				double[] fofo = toto;
- 
-				System.out.println("========="+toto);
+				netWorkOutPut = getNetworkOutput(inputs[j]);
+				backPropagateError(netWorkOutPut,this.expectedOutputs[j]);
 			}
 		}
 	}
@@ -127,7 +125,6 @@ public class IQNeuralNetwork {
 		double[] returnValue = new double[layers.getLast().getNodes().size()];
 		for(int i = 0 ; i< layers.getLast().getNodes().size(); i++) {
 			returnValue[i] = layers.getLast().getNodes().get(i).getValue();
-			//System.out.println(">>"+layers.getLast().getNodes().get(i).getValue());
 		}
 	 
 		return returnValue;
@@ -135,9 +132,56 @@ public class IQNeuralNetwork {
 	}
 	
 	
-	public double[]  backPropagateError(double[] nnOutput, double[] nnExpectedOutputs) {
-		return null ;
- 
+	public void backPropagateError(double[] nnOutput, double[] nnExpectedOutputs) {
+		
+		for(int i=0 ;i < layers.getLast().getNodes().size(); i++) {
+			double currentErrorDelta = 0;
+			currentErrorDelta = layers.getLast().getNodes().get(i).getValue();
+			currentErrorDelta = (1 - currentErrorDelta)*(nnOutput[i] - currentErrorDelta);
+			
+			ArrayList<Double> updatedWeights = new ArrayList<Double>(layers.getLast().getNodes().get(i).getWeights().size());
+			
+			for(int j = 0 ; j < layers.getLast().getNodes().get(i).getWeights().size(); j++) {
+				double myWeight = 0;
+				myWeight = layers.getLast().getNodes().get(i).getWeights().get(j).doubleValue();
+				myWeight = myWeight + NNMAth.LEARNING_RATE * (layers.getLast().getNodes().get(i).getError()) * (layers.listIterator(i).previous().getNodes().get(j).getValue());
+				updatedWeights.add(myWeight);
+			}
+			
+			layers.getLast().getNodes().get(i).getWeights().clear();
+			layers.getLast().getNodes().get(i).setWeights(updatedWeights);
+		}
+		
+		
+		for(int k = (layers.size() - 1); k > 1 ; k--) {
+			if(layers.listIterator(k).hasNext() == true) {
+				
+				for(int l=0 ;l < layers.get(k).getNodes().size(); l++) {
+					double currentErrorDelta = 0;
+					currentErrorDelta = layers.get(k).getNodes().get(l).getValue();
+					currentErrorDelta *= (1 - currentErrorDelta);
+					
+					double nextLayerErrorAndWeightsFactor = 0;
+					
+					for(int m = 0 ; m < layers.listIterator(k).next().getNodes().size(); m++) {
+						nextLayerErrorAndWeightsFactor += layers.listIterator(k).next().getNodes().get(m).getError() * layers.listIterator(k).next().getNodes().get(m).getWeights().get(l).doubleValue();	 
+					}
+					
+					currentErrorDelta *= nextLayerErrorAndWeightsFactor;
+				}
+				
+			}
+		}
+
+		
+		
+		for(int n=0 ;n < layers.getFirst().getNodes().size(); n++) {
+			double currentErrorDelta = 0;
+			
+		}
+		
+		
+		
 	}
 	
 

@@ -1,6 +1,5 @@
 package com.mobilityspot.nn;
 
-import java.util.LinkedList;
 
 public class Tester {
 

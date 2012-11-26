@@ -1,6 +1,8 @@
 package com.mobilityspot.nn;
 
 public class NNMAth {
+	
+	static double LEARNING_RATE = 1;
 
 	static double sigmoid(double input) {
 		return (1 / (1 + Math.exp(-input) ) );

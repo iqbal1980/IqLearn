@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class IQNode {
 	private double value;
 	private ArrayList<Double> weights;
+	private double error;
 
 	public IQNode(double nodeValue) {
 		this.value = nodeValue;
@@ -36,6 +37,14 @@ public class IQNode {
 
 	public void setWeights(ArrayList<Double> weights) {
 		this.weights = weights;
+	}
+	
+	public double getError() {
+		return error;
+	}
+
+	public void setError(double error) {
+		this.error = error;
 	}
 	
 	
