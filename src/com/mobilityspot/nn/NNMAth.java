@@ -9,5 +9,9 @@ public class NNMAth {
 	static double sigmoidDerivative(double input) {
 		return (  Math.exp(input) / ((Math.exp(input) +1)*(Math.exp(input) +1))  ) ;
 	}
+	
+	static double errorThreshHold() {
+		return 0.0005;
+	}
  
 }

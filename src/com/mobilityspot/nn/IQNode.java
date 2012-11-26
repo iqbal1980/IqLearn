@@ -1,30 +1,42 @@
 package com.mobilityspot.nn;
 
+import java.util.ArrayList;
+
 public class IQNode {
 	private double value;
-	private double weight;
-/*
-	public IQNode(1) {
-		this.value = 1;
-		this.weight = ;
-	}*/
-	
-	public IQNode(double nodeValue, double nodeWeight) {
+	private ArrayList<Double> weights;
+
+	public IQNode(double nodeValue) {
 		this.value = nodeValue;
-		this.weight = nodeWeight;
 	}
 	
+	public IQNode(double nodeValue, double[] nodeWeights,double nodeError) {
+		this.value = nodeValue;
+
+	}
+	
+	
+	public void initNodeWeights(int numberOfWeights ) {
+		ArrayList<Double> nodeWeights = new ArrayList<Double>();
+		for(int i=0 ;i< numberOfWeights ; i++) {
+			nodeWeights.add(0.2);
+		}
+		this.weights = nodeWeights;
+	}
 	public double getValue() {
 		return value;
 	}
 	public void setValue(double value) {
 		this.value = value;
 	}
-	public double getWeight() {
-		return weight;
-	}
-	public void setWeight(double weight) {
-		this.weight = weight;
+
+	public ArrayList<Double> getWeights() {
+		return weights;
 	}
 
+	public void setWeights(ArrayList<Double> weights) {
+		this.weights = weights;
+	}
+	
+	
 }

@@ -2,6 +2,7 @@ package com.mobilityspot.nn;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Random;
 
 public class IQNeuralNetwork {
 	private LinkedList<IQLayer> layers  = new LinkedList<IQLayer>();
@@ -28,15 +29,44 @@ public class IQNeuralNetwork {
 		}
 		System.out.println("**************************************");
 	}
-	public IQNeuralNetwork(double[][] myInputs, double[][] myExpectedOutputs) {
+	public IQNeuralNetwork(double[][] myInputs, double[][] myExpectedOutputs,  int[] dimensionsOfHiddenLayers) throws Exception {
 		this.inputs = myInputs;
 		this.expectedOutputs = myExpectedOutputs;
-	}
-	
-	public IQNeuralNetwork(LinkedList<IQLayer> nnLayers , double[][] myInputs, double[][] myExpectedOutputs) {
-		this.layers = nnLayers;
-		this.inputs = myInputs;
-		this.expectedOutputs = myExpectedOutputs;
+		
+		//System.out.println(myInputs[0].length);
+		
+		int numberOfInputs = myInputs[0].length;
+		int numberOfOutpus = myExpectedOutputs[0].length;
+		
+		IQLayer inputLayer = new IQLayer(numberOfInputs);
+		IQLayer outputLayer = new IQLayer(numberOfOutpus);
+		
+		layers.add(inputLayer);
+		
+
+		for(int i = 0 ; i < dimensionsOfHiddenLayers.length ; i++) {
+				IQLayer inputLayerTmp = null;
+				inputLayerTmp = new IQLayer(dimensionsOfHiddenLayers[i]);
+				layers.add(inputLayerTmp);
+		}
+		
+		layers.add(outputLayer);
+		
+		
+		for(IQNode myNode : layers.getFirst().getNodes()) {
+			myNode.setWeights(null);
+		}
+		
+		for(int i=0;i<layers.size();i++) {
+			if(layers.listIterator(i).hasPrevious() == true) {
+				int previousLayerSize = layers.listIterator(i).previous().getNodes().size();
+				int currentLayerSize =  layers.get(i).getNodes().size();
+				for(IQNode myNode : layers.get(i).getNodes()) {
+					myNode.initNodeWeights(previousLayerSize);
+				}
+			}
+		}
+		
 	}
 
 	public LinkedList<IQLayer> getLayers() {
@@ -52,65 +82,85 @@ public class IQNeuralNetwork {
 	}
 	
 	
+	
+	public void resetNeuralNetwork() {
+		
+	}
+	
 	public void trainNeuralNetwork() throws Exception {
 		//displayInputs();
 		//displayOutputs();
+		//printNNStructure();
+		double[] toto = null;
+		for(int i = 0; i < 1  ; i++) { //training iterations
+			for(int j = 0; j<1/*inputs.length*/;j++) {
+				toto = getNetworkOutput(inputs[j]);
+				double[] fofo = toto;
  
-		if(this.inputs[0].length != layers.getFirst().getNodes().size() || this.expectedOutputs[0].length != layers.getLast().getNodes().size()) {
-			throw new Exception("Input or output size not matching first and/or last layers");
-		} else {
-			
-			//for(int i = 0; i < 10000 ; i++) { //10000 = training iterations
-				
-				for(int j = 0; j < this.inputs.length; j++) {
-					
-					System.out.println(getNetworkOutput(inputs[j])[0]);
-					
-				}
-				
-			//}	
-			
+				System.out.println("========="+toto);
+			}
 		}
 	}
 	
 	public double[]  getNetworkOutput(double[] inputsValues) {
-		layers.getFirst().updateNodesValues(inputsValues);
-		double newValue = layers.getFirst().getLayerOutput();
-
-		for(int i = 1; i < layers.size() - 1; i++) {
-			layers.get(i).updateNodesValues(newValue);
-			newValue = layers.get(i).getLayerOutput();
+		for(int i=0 ;i < layers.getFirst().getNodes().size(); i++) {
+			layers.getFirst().getNodes().get(i).setValue(inputsValues[i]);
+			System.out.println(inputsValues[i]);
 		}
 		
-		
-		layers.getLast().updateNodesValues(newValue);
-		
-		/*for(IQNode myNode : layers.getLast().getNodes()) {
-			myNode.setValue(newValue);
-		}*/
-		
-		int j = 0;
-		double[] returnLastLayerValues = new double[expectedOutputs.length];
+		for(int i=0; i<layers.size(); i++) {
+			if(layers.listIterator(i).hasPrevious() == true) {
+				int previousLayerSize = layers.listIterator(i).previous().getNodes().size();
+				int currentLayerSize =  layers.get(i).getNodes().size();
 
-		for(IQNode myNode2 : layers.getLast().getNodes()) {
-			returnLastLayerValues[j] = myNode2.getValue() * myNode2.getWeight();
-			j++;
+				for(IQNode currentLayerNode : layers.get(i).getNodes()) {
+					double newValue = 0;
+					for(int j=0 ; j < currentLayerNode.getWeights().size();j++) {
+						newValue += currentLayerNode.getWeights().get(j) * layers.listIterator(i).previous().getNodes().get(j).getValue();
+					}
+					currentLayerNode.setValue(NNMAth.sigmoid(newValue));
+					
+				}
+			}
 		}
 		
-		return returnLastLayerValues;
+		double[] returnValue = new double[layers.getLast().getNodes().size()];
+		for(int i = 0 ; i< layers.getLast().getNodes().size(); i++) {
+			returnValue[i] = layers.getLast().getNodes().get(i).getValue();
+			//System.out.println(">>"+layers.getLast().getNodes().get(i).getValue());
+		}
+	 
+		return returnValue;
+
 	}
 	
 	
+	public double[]  backPropagateError(double[] nnOutput, double[] nnExpectedOutputs) {
+		return null ;
+ 
+	}
+	
 
 	public void printNNStructure() {
+		System.out.println("===================================================================================================================");
 		for(IQLayer layer : layers) {
 			System.out.println("layer **************"+ layers.indexOf(layer));
 			for(IQNode node : layer.getNodes()) {
 				System.out.println("node number " + layer.getNodes().indexOf(node));
-				System.out.println("node weight = " + node.getWeight() + " & node value = " + node.getValue());
+				System.out.println("node  value " + node.getValue());
+				System.out.println("layerWeights = ");  
+				if(node.getWeights() != null) {
+					int counter = 0;
+					for(Double currentWeight : node.getWeights()) {
+						System.out.println("layerWeight "+counter +" =|= "+currentWeight);
+						counter++;
+					}
+				}
+
 			}
-			System.out.println("layer output = " + layer.getLayerOutput());
+			//System.out.println("layer output = " + layer.getLayerOutput());
 		}
+		System.out.println("===================================================================================================================");
 	}
 	
 }
