@@ -1,11 +1,13 @@
 package com.mobilityspot.nn;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class IQNode {
 	private double value;
 	private ArrayList<Double> weights;
 	private double error;
+	private boolean isBiasNode = false;
 
 	public IQNode(double nodeValue) {
 		this.value = nodeValue;
@@ -13,14 +15,25 @@ public class IQNode {
 	
 	public IQNode(double nodeValue, double[] nodeWeights,double nodeError) {
 		this.value = nodeValue;
+		this.isBiasNode = false;
 
 	}
 	
 	
+	public IQNode(double nodeValue, double[] nodeWeights,double nodeError,boolean isBias) {
+		this.value = nodeValue;
+		this.isBiasNode = isBias;
+	}
+
 	public void initNodeWeights(int numberOfWeights ) {
 		ArrayList<Double> nodeWeights = new ArrayList<Double>();
 		for(int i=0 ;i< numberOfWeights ; i++) {
-			nodeWeights.add(0.2);
+			//double x = (new Double(i).doubleValue())/10;
+			//x = 0.50 + x;
+			//nodeWeights.add(x);
+			Random r=new Random();
+			double myRand = (0.5 - r.nextDouble());
+			nodeWeights.add(myRand);
 		}
 		this.weights = nodeWeights;
 	}
@@ -46,6 +59,16 @@ public class IQNode {
 	public void setError(double error) {
 		this.error = error;
 	}
+
+	public boolean isBiasNode() {
+		return isBiasNode;
+	}
+
+	public void setBiasNode(boolean isBiasNode) {
+		this.isBiasNode = isBiasNode;
+	}
+	
+	
 	
 	
 }

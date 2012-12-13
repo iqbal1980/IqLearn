@@ -13,16 +13,16 @@ public class Tester {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		int[] dimensionsOfHiddenLayers = {2};
+		int[] dimensionsOfHiddenLayers = {3};
 		double[][] inputs = {{1,0},{0,1},{1,1},{0,0}};
-		double[][] outputs =  {{1},{1},{1},{0}};
+		double[][] outputs =  {{1},{1},{0},{0}};
 		
 		IQNeuralNetwork myNN = new IQNeuralNetwork(inputs,outputs,dimensionsOfHiddenLayers);
  
 		
-		//myNN.printNNStructure();
+		 
 		myNN.trainNeuralNetwork();
-		myNN.printNNStructure();
+	 
  
 
 		 

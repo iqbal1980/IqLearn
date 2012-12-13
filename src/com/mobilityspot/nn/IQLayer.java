@@ -10,10 +10,21 @@ public class IQLayer {
 		nodes = new LinkedList<IQNode>();
 		
 		for(int i = 0; i < numberOfNodes ; i++) {
-			nodes.add(new IQNode(1, null, 10));
+			nodes.add(new IQNode(1, null, 0.0));
 		}
 	}
 	
+	
+	public IQLayer(int numberOfNodes,boolean withBias) {
+		nodes = new LinkedList<IQNode>();
+		
+		for(int i = 0; i < numberOfNodes ; i++) {
+			nodes.add(new IQNode(1, null, 0.0));
+		}		
+		if(withBias == true) {
+			nodes.addLast(new IQNode(1, null, 0.0, true));
+		}
+	}
 	
 	public LinkedList<IQNode> getNodes() {
 		return nodes;
@@ -23,19 +34,5 @@ public class IQLayer {
 		this.nodes = nodes;
 	}
 	
-	public void updateNodesValues(double[] values) {
-		int i = 0;
-		for(IQNode node : nodes) {
-			node.setValue(values[i]);
-			i++;
-		}
-	}
-	
-	public void updateNodesValues(double sameValue) {
-		int i = 0;
-		for(IQNode node : nodes) {
-			node.setValue(sameValue);
-			i++;
-		}
-	}
+ 
 }
