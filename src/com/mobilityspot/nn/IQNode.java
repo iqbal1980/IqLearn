@@ -3,7 +3,7 @@ package com.mobilityspot.nn;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class IQNode {
+public class IQNode implements java.io.Serializable {
 	private double value;
 	private ArrayList<Double> weights;
 	private double error;

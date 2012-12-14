@@ -2,7 +2,7 @@ package com.mobilityspot.nn;
 
 import java.util.LinkedList;
 
-public class IQLayer {
+public class IQLayer implements java.io.Serializable {
 	private LinkedList<IQNode> nodes; 
 	
 	

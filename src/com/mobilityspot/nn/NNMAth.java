@@ -1,6 +1,6 @@
 package com.mobilityspot.nn;
 
-public class NNMAth {
+public class NNMAth implements java.io.Serializable {
 	
 	static double LEARNING_RATE =  1;
 	static double LEARNING_MOMENTUM = 1;
