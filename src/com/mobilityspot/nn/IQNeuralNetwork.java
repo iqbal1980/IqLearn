@@ -77,12 +77,12 @@ public class IQNeuralNetwork implements java.io.Serializable {
  
 		//printNNStructure();
 		double[] netWorkOutPut = null;
-		for(int i = 0; i < 10000  ; i++) { //training iterations
+		for(int i = 0; i < 100000  ; i++) { //training iterations
 			for(int j = 0; j<  inputs.length    ;j++) {
 				netWorkOutPut = getNetworkOutput(inputs[j]);
 				//printNNStructure();
 				backPropagateError(netWorkOutPut,this.expectedOutputs[j]);
-				printNNStructure();
+				//printNNStructure();
 			}
 		}
 	}

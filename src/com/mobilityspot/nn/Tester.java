@@ -22,8 +22,10 @@ public class Tester {
 		
 		 
 		myNN.trainNeuralNetwork();
-	 
- 
+	  double[][] toto = {{0.0001,0.00002}};
+		myNN.getNetworkOutput(toto[0]);
+		
+		myNN.printNNStructure();
 
 		 
 		
