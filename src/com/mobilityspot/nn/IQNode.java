@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class IQNode implements java.io.Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2387967674680169002L;
 	private double value;
 	private ArrayList<Double> weights;
 	private double error;

@@ -2,9 +2,12 @@ package com.mobilityspot.nn;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Random;
 
 public class IQNeuralNetwork implements java.io.Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1488930130307912669L;
 	private LinkedList<IQLayer> layers  = new LinkedList<IQLayer>();
 	private double[][] inputs;
 	private double[][] expectedOutputs;
@@ -47,7 +50,6 @@ public class IQNeuralNetwork implements java.io.Serializable {
 			System.out.println("i === "+i + " layers.listIterator(i).hasPrevious() === "+ layers.listIterator(i).hasPrevious());
 			if(layers.listIterator(i).hasPrevious() == true) {
 				int previousLayerSize = layers.get(i - 1).getNodes().size();//layers.listIterator(i).previous().getNodes().size();
-				int currentLayerSize =  layers.get(i).getNodes().size();
 				for(IQNode myNode : layers.get(i).getNodes()) {
 					myNode.initNodeWeights(previousLayerSize);
 				}
@@ -75,7 +77,7 @@ public class IQNeuralNetwork implements java.io.Serializable {
  
 		//printNNStructure();
 		double[] netWorkOutPut = null;
-		for(int i = 0; i < 3000000  ; i++) { //training iterations
+		for(int i = 0; i < 10000  ; i++) { //training iterations
 			for(int j = 0; j<  inputs.length    ;j++) {
 				netWorkOutPut = getNetworkOutput(inputs[j]);
 				//printNNStructure();
@@ -92,8 +94,8 @@ public class IQNeuralNetwork implements java.io.Serializable {
 		
 		for(int i=0; i<layers.size(); i++) {
 			if(layers.listIterator(i).hasPrevious() == true) {
-				int previousLayerSize = layers.get(i - 1).getNodes().size();//layers.listIterator(i).previous().getNodes().size();
-				int currentLayerSize =  layers.get(i).getNodes().size();
+				//int previousLayerSize = layers.get(i - 1).getNodes().size();//layers.listIterator(i).previous().getNodes().size();
+				//int currentLayerSize =  layers.get(i).getNodes().size();
 
 				for(IQNode currentLayerNode : layers.get(i).getNodes()) {
 					double newValue = 0;

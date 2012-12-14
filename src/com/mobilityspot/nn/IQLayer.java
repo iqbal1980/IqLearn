@@ -3,6 +3,10 @@ package com.mobilityspot.nn;
 import java.util.LinkedList;
 
 public class IQLayer implements java.io.Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6004073133128832694L;
 	private LinkedList<IQNode> nodes; 
 	
 	

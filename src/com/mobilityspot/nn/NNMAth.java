@@ -2,6 +2,10 @@ package com.mobilityspot.nn;
 
 public class NNMAth implements java.io.Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8633685680777325575L;
 	static double LEARNING_RATE =  1;
 	static double LEARNING_MOMENTUM = 1;
 	
