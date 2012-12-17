@@ -3,7 +3,7 @@ package com.mobilityspot.nn;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class IQNode implements java.io.Serializable {
+public class IqNode implements java.io.Serializable {
 	/**
 	 * 
 	 */
@@ -13,18 +13,18 @@ public class IQNode implements java.io.Serializable {
 	private double error;
 	private boolean isBiasNode = false;
 
-	public IQNode(double nodeValue) {
+	public IqNode(double nodeValue) {
 		this.value = nodeValue;
 	}
 	
-	public IQNode(double nodeValue, double[] nodeWeights,double nodeError) {
+	public IqNode(double nodeValue, double[] nodeWeights,double nodeError) {
 		this.value = nodeValue;
 		this.isBiasNode = false;
 
 	}
 	
 	
-	public IQNode(double nodeValue, double[] nodeWeights,double nodeError,boolean isBias) {
+	public IqNode(double nodeValue, double[] nodeWeights,double nodeError,boolean isBias) {
 		this.value = nodeValue;
 		this.isBiasNode = isBias;
 	}

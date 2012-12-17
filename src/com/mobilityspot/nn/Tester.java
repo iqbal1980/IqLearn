@@ -17,7 +17,7 @@ public class Tester {
 		double[][] inputs = {{1,0},{0,1},{1,1},{0,0}};
 		double[][] outputs =  {{1},{1},{0},{0}};
 		
-		IQNeuralNetwork myNN = new IQNeuralNetwork(inputs,outputs,dimensionsOfHiddenLayers);
+		IqNeuralNetwork myNN = new IqNeuralNetwork(inputs,outputs,dimensionsOfHiddenLayers);
  
 		
 		 
