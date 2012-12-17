@@ -26,8 +26,8 @@ public class IqSvmKernelAdatron {
 	
 	public void svmKernelAdatronTrain(double[][] vectorsToTrain, double[] expectedOutputs, int typeOfKernel, double eta,double eps,double margin,double theta) {	
 		int m = expectedOutputs.length;
-		double[][] v = {{-1,-1}, {-1,+1}, {+1,-1}, {+1,+1}};
-		double[] y = {+1, -1, -1, +1};
+		double[][] v = vectorsToTrain;
+		double[] y = expectedOutputs;
 		double[] alpha = new double[m];
 	 
 		double min = 0, max = 0;
@@ -83,6 +83,7 @@ public class IqSvmKernelAdatron {
 
 		finalClassificationResult = finalClassificationResult - myTetha;
 		System.out.println("Final Classification = "+finalClassificationResult);
+		System.out.println("Final Classification with sign = "+Math.signum(finalClassificationResult));
 		return Math.signum(finalClassificationResult);
 	}
 
