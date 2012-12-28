@@ -1,5 +1,10 @@
 package com.mobilityspot.nn;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -77,12 +82,12 @@ public class IqNeuralNetwork implements java.io.Serializable {
  
 		//printNNStructure();
 		double[] netWorkOutPut = null;
-		for(int i = 0; i < 100000  ; i++) { //training iterations
+		for(int i = 0; i < 10000  ; i++) { //training iterations
 			for(int j = 0; j<  inputs.length    ;j++) {
 				netWorkOutPut = getNetworkOutput(inputs[j]);
 				//printNNStructure();
 				backPropagateError(netWorkOutPut,this.expectedOutputs[j]);
-				//printNNStructure();
+				printNNStructure();
 			}
 		}
 	}
@@ -115,7 +120,7 @@ public class IqNeuralNetwork implements java.io.Serializable {
 		for(int i = 0 ; i< layers.getLast().getNodes().size(); i++) {
 			returnValue[i] = layers.getLast().getNodes().get(i).getValue();
 		}
-	 
+		printNNStructure();
 		return returnValue;
 
 	}
@@ -209,6 +214,35 @@ public class IqNeuralNetwork implements java.io.Serializable {
 			//System.out.println("layer output = " + layer.getLayerOutput());
 		}
 		System.out.println("===================================================================================================================");
+	}
+	
+	
+	public void saveNNStatus(String fileName) {
+		try  {
+	         FileOutputStream fileOut =
+	         new FileOutputStream(fileName);
+	         ObjectOutputStream out = new ObjectOutputStream(fileOut);
+	         out.writeObject(this);
+	         out.close();
+	          fileOut.close();
+	      } catch(IOException i) {
+	          i.printStackTrace();
+	      }
+	}
+	
+	public IqNeuralNetwork retriveNNStatusFromFile(String fileName) {
+		IqNeuralNetwork nn = null;
+		try {
+	         FileInputStream fileIn = new FileInputStream(fileName);
+	         ObjectInputStream in = new ObjectInputStream(fileIn);
+	         nn = (IqNeuralNetwork) in.readObject();
+	         in.close();
+	         fileIn.close();
+	         return nn;
+	      } catch(Exception err) {
+	    	  return null;
+	      }
+	      
 	}
 	
 }

@@ -19,14 +19,20 @@ public class Tester {
 		
 		IqNeuralNetwork myNN = new IqNeuralNetwork(inputs,outputs,dimensionsOfHiddenLayers);
  
-		
+	 
 		 
 		myNN.trainNeuralNetwork();
-	  double[][] toto = {{0.0001,0.00002}};
-		myNN.getNetworkOutput(toto[0]);
+		myNN.saveNNStatus("xor.ser");
+	 
 		
-		myNN.printNNStructure();
-
+	  double[][] toto = {{1.0001,0.00002}};
+		 
+		 myNN.getNetworkOutput(toto[0]);
+		 myNN.printNNStructure();
+	 
+	  
+	  myNN.retriveNNStatusFromFile("xor.ser").getNetworkOutput(toto[0]);
+ 
 		 
 		
 	}

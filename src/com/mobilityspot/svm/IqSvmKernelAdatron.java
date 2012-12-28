@@ -39,17 +39,14 @@ public class IqSvmKernelAdatron {
 		}
 		
 		
-		while(Math.abs(margin - 1.0) > eps) 
-		{	
+		while(Math.abs(margin - 1.0) > eps) {	
 			System.out.println("margin ===>"+margin);
 			mininit = maxinit = 1;
-			for(i=0;i<m;i++)
-			{
+			for(i=0;i<m;i++) {
 			double z = 0.0;
-				for(j=0;j<m;j++) 
-					{
+				for(j=0;j<m;j++)  {
 						z+= alpha[j]*y[j]*getKernelOutput(v[i],v[j],typeOfKernel);
-					}
+				}
 			double delta = eta*(1.0-y[i]*(z-theta));
 			if(alpha[i]+ delta<=0.0) { 
 				alpha[i] = 0.0;
