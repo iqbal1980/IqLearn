@@ -10,6 +10,8 @@ public class IqNode implements java.io.Serializable {
 	private static final long serialVersionUID = -2387967674680169002L;
 	private double value;
 	private ArrayList<Double> weights;
+	private ArrayList<Double> gradients; // (Value of previous Node) * (Node error)
+
 	private double error;
 	private boolean isBiasNode = false;
 
@@ -41,6 +43,17 @@ public class IqNode implements java.io.Serializable {
 		}
 		this.weights = nodeWeights;
 	}
+	
+	public void initNodeGradients(int numberOfGradients ) {
+		ArrayList<Double> nodeGradients = new ArrayList<Double>();
+		for(int i=0 ;i< numberOfGradients ; i++) {
+			double x = 0;
+			nodeGradients.add(x);
+ 
+		}
+		this.gradients = nodeGradients;
+	}
+	
 	public double getValue() {
 		return value;
 	}
@@ -54,6 +67,14 @@ public class IqNode implements java.io.Serializable {
 
 	public void setWeights(ArrayList<Double> weights) {
 		this.weights = weights;
+	}
+	
+	public ArrayList<Double> getGradients() {
+		return gradients;
+	}
+
+	public void setGradients(ArrayList<Double> gradients) {
+		this.gradients = gradients;
 	}
 	
 	public double getError() {

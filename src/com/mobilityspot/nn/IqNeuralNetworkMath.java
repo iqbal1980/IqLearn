@@ -21,4 +21,14 @@ public class IqNeuralNetworkMath implements java.io.Serializable {
 		return 0.0005;
 	}
  
+	
+    static int sign(final double value) {
+        if (Math.abs(value) < 0.00000000000000001) {
+                return 0;
+        } else if (value > 0) {
+                return 1;
+        } else {
+                return -1;
+        }
+}
 }
