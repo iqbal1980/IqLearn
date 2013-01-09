@@ -5,9 +5,11 @@ public class IqNeuralNetworkMath implements java.io.Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -8633685680777325575L;
+	private static final long serialVersionUID = -8433685280777325575L;
 	static double LEARNING_RATE =  1;
 	static double LEARNING_MOMENTUM = 1;
+	static int BACKPROP = 0;
+	static int IRPROPMIN = 1;
 	
 	static double sigmoid(double input) {
 		return (1 / (1 + Math.exp(-input) ) );
@@ -30,5 +32,5 @@ public class IqNeuralNetworkMath implements java.io.Serializable {
         } else {
                 return -1;
         }
-}
+    }
 }
