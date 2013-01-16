@@ -17,7 +17,7 @@ public class Tester {
 		double[][] inputs = {{1,0},{0,1},{1,1},{0,0}};
 		double[][] outputs =  {{1.0},{1.0},{0.0},{0.0}};
 		
-		IqNeuralNetwork myNN = new IqNeuralNetwork(inputs,outputs,dimensionsOfHiddenLayers,1500,IqNeuralNetworkMath.IRPROPMIN,true);
+		IqNeuralNetwork myNN = new IqNeuralNetwork(inputs,outputs,dimensionsOfHiddenLayers,2000,IqNeuralNetworkMath.BACKPROP,false);
 
  
 		 
@@ -26,16 +26,30 @@ public class Tester {
 		
  
 		myNN.saveNNStatus("xor2.ser");
-	 /*
-		
-	  double[][] toto = {{1.0,1.0}};
-		 
-		 myNN.getNetworkOutput(toto[0]);
-		 myNN.printNNStructure("tesT");
 	 
+		
+		double[][] input_0_0 = {{0.0,0.0}};
+		myNN.getNetworkOutput(input_0_0[0]);
+		myNN.printNNStructure("test");
+	 
+		double[][] input_1_1 = {{1.0,1.0}};
+		myNN.getNetworkOutput(input_1_1[0]);
+		myNN.printNNStructure("test");
+		
+		double[][] input_1_0 = {{1.0,0.0}};
+		myNN.getNetworkOutput(input_1_0[0]);
+		myNN.printNNStructure("test");
 	  
-	  myNN.retriveNNStatusFromFile("xor2.ser").getNetworkOutput(toto[0]);
- */
+		double[][] input_0_1 = {{0.0,1.0}};
+		myNN.getNetworkOutput(input_0_1[0]);
+		myNN.printNNStructure("test");
+		
+ 
+		myNN.retriveNNStatusFromFile("xor2.ser").getNetworkOutput(input_0_0[0]);
+		myNN.retriveNNStatusFromFile("xor2.ser").getNetworkOutput(input_1_1[0]);
+		myNN.retriveNNStatusFromFile("xor2.ser").getNetworkOutput(input_1_0[0]);
+		myNN.retriveNNStatusFromFile("xor2.ser").getNetworkOutput(input_0_1[0]);
+ 
 		 
 		
 	}

@@ -11,6 +11,8 @@ public class IqNode implements java.io.Serializable {
 	private double value;
 	private ArrayList<Double> weights;
 	private ArrayList<Double> gradients; // (Value of previous Node) * (Node error)
+	private ArrayList<Double> lastGradients; 
+	private ArrayList<Double> rpropLastDeltas;
 
 	private double error;
 	private boolean isBiasNode = false;
@@ -38,7 +40,7 @@ public class IqNode implements java.io.Serializable {
 			//x = 0.50 + x;
 			//nodeWeights.add(x);
 			Random r=new Random();
-			double myRand = (0.5 - r.nextDouble());
+			double myRand = r.nextDouble()*2.0 - 1.0;//(0.5 - r.nextDouble());
 			nodeWeights.add(myRand);
 		}
 		this.weights = nodeWeights;
@@ -52,6 +54,25 @@ public class IqNode implements java.io.Serializable {
  
 		}
 		this.gradients = nodeGradients;
+	}
+	
+	public void initNodeLastGradients(int numberOfLastGradients ) {
+		ArrayList<Double> nodeLastGradients = new ArrayList<Double>();
+		for(int i=0 ;i< numberOfLastGradients ; i++) {
+			double x = 0;
+			nodeLastGradients.add(x);
+ 
+		}
+		this.lastGradients = nodeLastGradients;
+	}
+	
+	public void initRpropLastDeltas(int numberOfRpropLastDeltas ) {
+		ArrayList<Double> nodeRpropLastDeltas = new ArrayList<Double>();
+		for(int i=0 ;i< numberOfRpropLastDeltas ; i++) {
+			double x = 0.1;
+			nodeRpropLastDeltas.add(x);
+		}
+		this.rpropLastDeltas = nodeRpropLastDeltas;
 	}
 	
 	public double getValue() {
@@ -77,6 +98,22 @@ public class IqNode implements java.io.Serializable {
 		this.gradients = gradients;
 	}
 	
+	public ArrayList<Double> getLastGradients() {
+		return lastGradients;
+	}
+
+	public void setLastGradients(ArrayList<Double> lastGradients) {
+		this.lastGradients = lastGradients;
+	}
+
+	public ArrayList<Double> getRpropLastDeltas() {
+		return rpropLastDeltas;
+	}
+
+	public void setRpropLastDeltas(ArrayList<Double> rpropLastDeltas) {
+		this.rpropLastDeltas = rpropLastDeltas;
+	}
+
 	public double getError() {
 		return error;
 	}
