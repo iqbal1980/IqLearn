@@ -9,7 +9,8 @@ public class IqNeuralNetworkMath implements java.io.Serializable {
 	static double LEARNING_RATE =  1;
 	static double LEARNING_MOMENTUM = 1;
 	static int BACKPROP = 0;
-	static int IRPROPMIN = 1;
+	static int BATCHBACKPROP = 1;
+	static int IRPROPMIN = 2;
 	
 	static double sigmoid(double input) {
 		return (1 / (1 + Math.exp(-input) ) );

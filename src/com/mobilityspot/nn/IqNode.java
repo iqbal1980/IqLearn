@@ -40,7 +40,7 @@ public class IqNode implements java.io.Serializable {
 			//x = 0.50 + x;
 			//nodeWeights.add(x);
 			Random r=new Random();
-			double myRand = r.nextDouble()*2.0 - 1.0;//(0.5 - r.nextDouble());
+			double myRand =  (0.5 - r.nextDouble());
 			nodeWeights.add(myRand);
 		}
 		this.weights = nodeWeights;

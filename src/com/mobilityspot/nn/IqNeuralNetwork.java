@@ -23,6 +23,8 @@ public class IqNeuralNetwork implements java.io.Serializable {
 	
 	private int trainingBatchIndex = 0;
 	
+	private int globalIndex = 0;
+	
 	//private double lastGradient1 = 0;
 	//private double lastGradient2 = 0;
 	//private double lastDelta1 = 0.1;
@@ -78,7 +80,7 @@ public class IqNeuralNetwork implements java.io.Serializable {
 			}
 		}
 		
-		printNNStructure("initialization");
+		//printNNStructure("initialization");
 		
 	}
 
@@ -102,12 +104,13 @@ public class IqNeuralNetwork implements java.io.Serializable {
 		//printNNStructure();
 		double[] netWorkOutPut = null;
 		for(int i = 0; i < this.nnTrainingEpoches  ; i++) { //training iterations
+			this.globalIndex = i;
 			this.trainingBatchIndex = 0;
 			for(int j = 0; j<  inputs.length    ;j++) {
 				this.trainingBatchIndex = j;
 				netWorkOutPut = getNetworkOutput(inputs[j]);
 				if(this.isDebugOn == true) {
-					printNNStructure("feedForward");
+					//printNNStructure("feedForward");
 				}
 				double errorRateBeforeAllowingBackPropagation = 0;
 				for(int k=0;k<netWorkOutPut.length - 1;k++) {	
@@ -116,9 +119,14 @@ public class IqNeuralNetwork implements java.io.Serializable {
 				
 				if(this.trainingMethod == IqNeuralNetworkMath.IRPROPMIN) {
 					backPropagateErrorWithRPROP(netWorkOutPut,this.expectedOutputs[j]);
-				} else {
+				} 
+				if(this.trainingMethod == IqNeuralNetworkMath.BACKPROP) {
 					//if(errorRateBeforeAllowingBackPropagation > 0.2) {
-						//backPropagateError(netWorkOutPut,this.expectedOutputs[j]);
+						backPropagateError(netWorkOutPut,this.expectedOutputs[j]);
+					//}	
+				}
+				if(this.trainingMethod == IqNeuralNetworkMath.BATCHBACKPROP) {
+					//if(errorRateBeforeAllowingBackPropagation > 0.2) {
 						backPropagateErrorBatch(netWorkOutPut,this.expectedOutputs[j]);
 					//}	
 				}
@@ -170,12 +178,9 @@ public class IqNeuralNetwork implements java.io.Serializable {
 			double currentErrorDelta = 0;
 			currentErrorDelta = layers.getLast().getNodes().get(i).getValue();
 			currentErrorDelta = currentErrorDelta*(1 - currentErrorDelta)*(nnExpectedOutputs[i] - currentErrorDelta);
- 
-			
 			
 			layers.getLast().getNodes().get(i).setError(currentErrorDelta);
 			
-			ArrayList<Double> updatedWeights = new ArrayList<Double>(layers.getLast().getNodes().get(i).getWeights().size());
 			
 			for(int j = 0 ; j < layers.getLast().getNodes().get(i).getWeights().size(); j++) {
 				double myWeight = 0;
@@ -184,11 +189,9 @@ public class IqNeuralNetwork implements java.io.Serializable {
 				int layersSize = layers.size() - 1;
 
 				myWeight = IqNeuralNetworkMath.LEARNING_MOMENTUM*myWeight + IqNeuralNetworkMath.LEARNING_RATE * (layers.getLast().getNodes().get(i).getError()) * layers.get(layersSize - 1).getNodes().get(j).getValue();//(layers.listIterator(layersSize).previous().getNodes().get(j).getValue());
-				updatedWeights.add(myWeight);
+				layers.getLast().getNodes().get(i).getWeights().set(j, myWeight);
 			}
-			
-			layers.getLast().getNodes().get(i).getWeights().clear();
-			layers.getLast().getNodes().get(i).setWeights(updatedWeights);	
+		
 		}
  
 		
@@ -207,14 +210,10 @@ public class IqNeuralNetwork implements java.io.Serializable {
 					 
 					 layers.get(k).getNodes().get(l).setError(deltaNodeError);
 					 
-					 ArrayList<Double> newWeights = new ArrayList<Double>();
-					 newWeights.clear();
 					 for(int n = 0; n < layers.get(k).getNodes().get(l).getWeights().size(); n++) {
 						 double newNodeWeight = IqNeuralNetworkMath.LEARNING_MOMENTUM*layers.get(k).getNodes().get(l).getWeights().get(n).doubleValue() + IqNeuralNetworkMath.LEARNING_RATE*layers.get(k).getNodes().get(l).getError()*layers.get(k-1).getNodes().get(n).getValue();
-						 newWeights.add(newNodeWeight);
+						 layers.get(k).getNodes().get(l).getWeights().set(n,newNodeWeight);
 					 }
-					 layers.get(k).getNodes().get(l).getWeights().clear();
-					 layers.get(k).getNodes().get(l).setWeights(newWeights);
 				 }
 			}
 		}
@@ -227,37 +226,24 @@ public class IqNeuralNetwork implements java.io.Serializable {
 			double currentErrorDelta = 0;
 			currentErrorDelta = layers.getLast().getNodes().get(i).getValue();
 			currentErrorDelta = currentErrorDelta*(1 - currentErrorDelta)*(nnExpectedOutputs[i] - currentErrorDelta);
- 
-			
-			
+ 		
 			layers.getLast().getNodes().get(i).setError(currentErrorDelta);
-			
-			ArrayList<Double> updatedWeights = new ArrayList<Double>(layers.getLast().getNodes().get(i).getWeights().size());
-			ArrayList<Double> updatedGradients = new ArrayList<Double>(layers.getLast().getNodes().get(i).getGradients().size());
-			
+
 			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			for(int j = 0 ; j < layers.getLast().getNodes().get(i).getWeights().size(); j++) {
-				double myWeight = 0;
-				double myGradient = layers.getLast().getNodes().get(i).getGradients().get(j).doubleValue();;
+				double myGradient = layers.getLast().getNodes().get(i).getGradients().get(j).doubleValue();
 				int layersSize = layers.size() - 1;
 				
-				myWeight = layers.getLast().getNodes().get(i).getWeights().get(j).doubleValue();
+				double myWeight = layers.getLast().getNodes().get(i).getWeights().get(j).doubleValue();
 				myGradient += (layers.getLast().getNodes().get(i).getError()) * layers.get(layersSize - 1).getNodes().get(j).getValue();
+				layers.getLast().getNodes().get(i).getGradients().set(j,myGradient);
 				
-				//System.out.println("this.trainingBatchIndex =====> "+this.trainingBatchIndex+" || gradient =====> "+myGradient);
 				if(this.trainingBatchIndex == 3) {
 					myWeight = IqNeuralNetworkMath.LEARNING_MOMENTUM*myWeight + IqNeuralNetworkMath.LEARNING_RATE * myGradient;
+					layers.getLast().getNodes().get(i).getWeights().set(j,myWeight);
 				 }
-				updatedWeights.add(myWeight);
-				updatedGradients.add(myGradient);
 			}
 			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			
-			layers.getLast().getNodes().get(i).getWeights().clear();
-			layers.getLast().getNodes().get(i).setWeights(updatedWeights);	
-			
-			layers.getLast().getNodes().get(i).getGradients().clear();
-			layers.getLast().getNodes().get(i).setGradients(updatedGradients);	
 		}
  
 		
@@ -275,30 +261,19 @@ public class IqNeuralNetwork implements java.io.Serializable {
 					 deltaNodeError *= newSigmaOfWxDeltaErrors;
 					 
 					 layers.get(k).getNodes().get(l).setError(deltaNodeError);
-					 
-					 ArrayList<Double> newWeights = new ArrayList<Double>();
-					 ArrayList<Double> newGradients = new ArrayList<Double>();
-					 
-					 newWeights.clear();
-					 newGradients.clear();
+
 					 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					 for(int n = 0; n < layers.get(k).getNodes().get(l).getWeights().size(); n++) {
-						 double newNodeWeight = 0;
 						 double newNodeGradient = layers.get(k).getNodes().get(l).getGradients().get(n).doubleValue();
-						 newNodeWeight = layers.get(k).getNodes().get(l).getWeights().get(n).doubleValue();
+						 double newNodeWeight = layers.get(k).getNodes().get(l).getWeights().get(n).doubleValue();
 						 newNodeGradient += layers.get(k).getNodes().get(l).getError()*layers.get(k-1).getNodes().get(n).getValue();
+						 layers.get(k).getNodes().get(l).getGradients().set(n,newNodeGradient);
 						 if(this.trainingBatchIndex == 3) {
 							 newNodeWeight = IqNeuralNetworkMath.LEARNING_MOMENTUM*newNodeWeight + IqNeuralNetworkMath.LEARNING_RATE*newNodeGradient;
+							 layers.get(k).getNodes().get(l).getWeights().set(n,newNodeWeight);
 						 }	 
-						 newWeights.add(newNodeWeight);
-						 newGradients.add(newNodeGradient);
 					 }
 					 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-					 layers.get(k).getNodes().get(l).getWeights().clear();
-					 layers.get(k).getNodes().get(l).setWeights(newWeights);
-					 
-					 layers.get(k).getNodes().get(l).getGradients().clear();
-					 layers.get(k).getNodes().get(l).setGradients(newGradients);
 				 }
 			}
 		}
@@ -306,94 +281,64 @@ public class IqNeuralNetwork implements java.io.Serializable {
 	}	
 	
 
-	public void backPropagateErrorWithRPROP(double[] nnOutput, double[] nnExpectedOutputs) {
 
-		
-		for(int i=0 ;i < layers.getLast().getNodes().size() /* - 1*/; i++) {//-1 accounts for disregarding bias node
+	public void backPropagateErrorWithRPROP(double[] nnOutput, double[] nnExpectedOutputs) {
+		for(int i=0 ;i < layers.getLast().getNodes().size()/* - 1*/; i++) {//-1 accounts for disregarding bias node
 			double currentErrorDelta = 0;
 			currentErrorDelta = layers.getLast().getNodes().get(i).getValue();
-			
 			currentErrorDelta = currentErrorDelta*(1 - currentErrorDelta)*(nnExpectedOutputs[i] - currentErrorDelta);
+ 
 			layers.getLast().getNodes().get(i).setError(currentErrorDelta);
 
-			
-			ArrayList<Double> updatedWeights = new ArrayList<Double>(layers.getLast().getNodes().get(i).getWeights().size());
-			ArrayList<Double> updateGradients = new ArrayList<Double>(layers.getLast().getNodes().get(i).getGradients().size());
-			ArrayList<Double> updateLastGradients = new ArrayList<Double>(layers.getLast().getNodes().get(i).getLastGradients().size());
-			ArrayList<Double> updateRpropLastDeltas = new ArrayList<Double>(layers.getLast().getNodes().get(i).getRpropLastDeltas().size());
-
-			//////////////////////////
-			//double lastGradient1 = 0;
-			//double lastDelta1 = 0.1;
-			//////////////////////////
-
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			for(int j = 0 ; j < layers.getLast().getNodes().get(i).getWeights().size(); j++) {
+				double myGradient = layers.getLast().getNodes().get(i).getGradients().get(j).doubleValue();
+				double myLastGradient = layers.getLast().getNodes().get(i).getLastGradients().get(j).doubleValue();
+				double myPropLastDelta = layers.getLast().getNodes().get(i).getRpropLastDeltas().get(j).doubleValue();
+				
 				
 				int layersSize = layers.size() - 1;
 				
-
 				double myWeight = layers.getLast().getNodes().get(i).getWeights().get(j).doubleValue();
-				double myGradient = (layers.getLast().getNodes().get(i).getError()) * layers.get(layersSize - 1).getNodes().get(j).getValue();
-				double myLastGradient = layers.getLast().getNodes().get(i).getLastGradients().get(j).doubleValue();
-				double myPropLastDelta = layers.getLast().getNodes().get(i).getRpropLastDeltas().get(j).doubleValue();
+				myGradient += (layers.getLast().getNodes().get(i).getError()) * layers.get(layersSize - 1).getNodes().get(j).getValue();
+				layers.getLast().getNodes().get(i).getGradients().set(j,myGradient);
+ 
+				if(this.trainingBatchIndex == 3) {
+					////////////////////////////////////////////////////////////////////////////
+					final int change1 = IqNeuralNetworkMath.sign(myGradient * myLastGradient);
 
-				System.out.println("current node error1 == "+layers.getLast().getNodes().get(i).getError());
-				System.out.println("previous node/weight value1 == "+layers.get(layersSize - 1).getNodes().get(j).getValue());
-				System.out.println("layer last || node = " +i+	" || weight===> "+j+" || myGradient == "+myGradient+" || myLastGradient == "+myLastGradient+" lastdelta == "+myPropLastDelta);
-				
-				////////////////////////////////////////////////////////////////////////////
-				final int change1 = IqNeuralNetworkMath.sign(myGradient * myLastGradient);
-				System.out.println("change1 ======>"+change1);
-                double weightChange1 = 0;
-                double delta1;
+	                double weightChange1 = 0;
+	                double delta1;
 
-                if (change1 > 0) {
-                        delta1 = myPropLastDelta * 1.2;
-                        delta1 = Math.min(delta1, 50); 
-                        
-                        System.out.println("change1 >0 ===> MAX delta1 = 1.2*myPropLastDelta == "+myPropLastDelta);
-                } else  {
-                        delta1 = myPropLastDelta * 0.5;
-                        delta1 = Math.max(delta1, 0.000001);
-                        myLastGradient = 0;
-                        
-                        System.out.println("change1 else ===> MIN delta1 = 0.5*myPropLastDelta == "+myPropLastDelta);
-                } 
-                
-                System.out.println("delta1=====>"+delta1);
-                myLastGradient = myGradient;
-                weightChange1 =  IqNeuralNetworkMath.sign(myGradient) * delta1;
-                myWeight += weightChange1;
-                myPropLastDelta = delta1;
-                
-				////////////////////////////////////////////////////////////////////////////	
-                
-                System.out.println("delta1 after=====>"+delta1);
-				
-				updatedWeights.add(myWeight);
-				updateGradients.add(myGradient);
-				updateLastGradients.add(myLastGradient);
-				updateRpropLastDeltas.add(myPropLastDelta);
-				
+	                if (change1 > 0) {
+	                        delta1 = myPropLastDelta * 1.2;
+	                        delta1 = Math.min(delta1, 50); 
+	                     
+	                } else  {
+	                        delta1 = myPropLastDelta * 0.5;
+	                        delta1 = Math.max(delta1, 0.000001);
+	                        myLastGradient = 0;
+	                } 
+	                
+	                myLastGradient = myGradient;
+	                weightChange1 =  IqNeuralNetworkMath.sign(myGradient) * delta1;
+	                myWeight += weightChange1;
+	                layers.getLast().getNodes().get(i).getWeights().set(j,myWeight);
+	                myPropLastDelta = delta1;
+	                
+	                layers.getLast().getNodes().get(i).getGradients().set(j,0.0);
+	                layers.getLast().getNodes().get(i).getLastGradients().set(j,myLastGradient);
+	                layers.getLast().getNodes().get(i).getRpropLastDeltas().set(j,myPropLastDelta);
+					////////////////////////////////////////////////////////////////////////////	
+				 }
 			}
-
-			layers.getLast().getNodes().get(i).getWeights().clear();
-			layers.getLast().getNodes().get(i).setWeights(updatedWeights);	
-
-			layers.getLast().getNodes().get(i).getGradients().clear();
-			layers.getLast().getNodes().get(i).setGradients(updateGradients);
-			
-			layers.getLast().getNodes().get(i).getLastGradients().clear();
-			layers.getLast().getNodes().get(i).setLastGradients(updateLastGradients);
-			
-			layers.getLast().getNodes().get(i).getRpropLastDeltas().clear();
-			layers.getLast().getNodes().get(i).setRpropLastDeltas(updateRpropLastDeltas);
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		}
  
-
+		
 		for(int k = (layers.size() - 2 ); k >=0 ; k--) {//looping trough middle hidden layers
 			if(layers.listIterator(k).hasPrevious() == true) {
-				 for(int l = 0; l < layers.get(k).getNodes().size() -1 ; l++) {//looping trough nodes of layer //disregarding bias node
+				 for(int l = 0; l < layers.get(k).getNodes().size(); l++) {//looping trough nodes of layer
 					 double deltaNodeError = 0;
 					 deltaNodeError = layers.get(k).getNodes().get(l).getValue();
 					 deltaNodeError *= 1 - deltaNodeError;
@@ -401,150 +346,277 @@ public class IqNeuralNetwork implements java.io.Serializable {
 					 for(int m = 0; m < layers.get(k + 1).getNodes().size(); m++) {//looping trough next layer nodes
 						 newSigmaOfWxDeltaErrors += layers.get(k + 1).getNodes().get(m).getWeights().get(l).doubleValue() * layers.get(k+1).getNodes().get(m).getError();
 					 }
-
+					 
 					 deltaNodeError *= newSigmaOfWxDeltaErrors;
+					 
 					 layers.get(k).getNodes().get(l).setError(deltaNodeError);
 
-					 ArrayList<Double> newWeights = new ArrayList<Double>();
-					 ArrayList<Double> newGradients = new ArrayList<Double>();
-					 ArrayList<Double> newLastGradients = new ArrayList<Double>();
-					 ArrayList<Double> newRpropLastDeltas = new ArrayList<Double>();
-
-					 newWeights.clear();
-					 newGradients.clear();
-					 newLastGradients.clear();
-					 newRpropLastDeltas.clear();
-					//////////////////////////
-					//double lastGradient2 = 0;
-					//double lastDelta2 = 0.1;
-					//////////////////////////
-
-
+					 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					 for(int n = 0; n < layers.get(k).getNodes().get(l).getWeights().size(); n++) {
+						 double newNodeGradient = layers.get(k).getNodes().get(l).getGradients().get(n).doubleValue();
 						 double newNodeWeight = layers.get(k).getNodes().get(l).getWeights().get(n).doubleValue();
-						 double newNodeGradient = layers.get(k).getNodes().get(l).getError()*layers.get(k-1).getNodes().get(n).getValue();
+						 
 						 double newNodeLastGradient = layers.get(k).getNodes().get(l).getLastGradients().get(n).doubleValue();
-						 double newRpropLastDelta = layers.get(k).getNodes().get(l).getRpropLastDeltas().get(n).doubleValue();
+						 double newRpropLastDelta = layers.get(k).getNodes().get(l).getRpropLastDeltas().get(n).doubleValue();		
 						 
+ 
+						 newNodeGradient += layers.get(k).getNodes().get(l).getError()*layers.get(k-1).getNodes().get(n).getValue();
+						 layers.get(k).getNodes().get(l).getGradients().set(n,newNodeGradient);
 						 
-						 System.out.println(">>>>>>>>>>>>>>>>>current node error2 == "+layers.get(k).getNodes().get(l).getError());
-						 System.out.println(">>>>>>>>>>>>>>>>>previous node/weight value2 == "+layers.get(k-1).getNodes().get(n).getValue());
-						 System.out.println(">>>>>>>>>>>>>>>>>layer = " + k +" || node = " +l+	" || weight===> "+n+" || newNodeGradient == "+newNodeGradient+" || newNodeLastGradient == "+newNodeLastGradient+" lastdelta == "+newRpropLastDelta);
-						 
-						 
-					 		////////////////////////////////////////////////////////////////////////////
-						    final int change2 = IqNeuralNetworkMath.sign(newNodeGradient * newNodeLastGradient);
-						    System.out.println(">>>>>>>>>>>>>>>>>delta2======>"+change2);
-			                double weightChange2 = 0;
-			                double delta2;
+						 if(this.trainingBatchIndex == 3) {
+						 	 ////////////////////////////////////////////////////////////////////////////
+							    final int change2 = IqNeuralNetworkMath.sign(newNodeGradient * newNodeLastGradient);
+				                double weightChange2 = 0;
+				                double delta2;
 
+				                if (change2 > 0) {
+				                	 	delta2 = newRpropLastDelta * 1.2;
+				                        delta2 = Math.min(delta2, 50);   
+				                } else  {
+				                        delta2 = newRpropLastDelta * 0.5;
+				                        delta2 = Math.max(delta2, 0.000001);
+				                        newNodeLastGradient =0;
+				                }
 
-			                if (change2 > 0) {
-			                	 	delta2 = newRpropLastDelta * 1.2;
-			                        delta2 = Math.min(delta2, 50);   
-			                        
-			                        System.out.println(">>>>>>>>>>>>>>>>>change2 >0 ===> MAX delta2 = 1.2*newRpropLastDelta == "+newRpropLastDelta);
-			                } else  {
-			                        delta2 = newRpropLastDelta * 0.5;
-			                        delta2 = Math.max(delta2, 0.000001);
-			                        newNodeLastGradient =0;
-			                        
-			                        System.out.println(">>>>>>>>>>>>>>>>>change2 else ===> MIN delta2 = 0.5*newRpropLastDelta == "+newRpropLastDelta);
-			                }
+				                newNodeLastGradient = newNodeGradient;
+				                weightChange2 = IqNeuralNetworkMath.sign(newNodeGradient) * delta2;
+				                newNodeWeight += weightChange2;
+				                layers.get(k).getNodes().get(l).getWeights().set(n,newNodeWeight);
+				                newRpropLastDelta = delta2;
+				                
+				                layers.get(k).getNodes().get(l).getGradients().set(n,0.0);
+				                layers.get(k).getNodes().get(l).getLastGradients().set(n,newNodeLastGradient);
+				                layers.get(k).getNodes().get(l).getRpropLastDeltas().set(n,newRpropLastDelta);
+							 ////////////////////////////////////////////////////////////////////////////	
 
-			                newNodeLastGradient = newNodeGradient;
-			                weightChange2 = IqNeuralNetworkMath.sign(newNodeGradient) * delta2;
-			                newNodeWeight += weightChange2;
-			                newRpropLastDelta = delta2;
-							////////////////////////////////////////////////////////////////////////////						 
-						
-			                System.out.println(">>>>>>>>>>>>>>>>>delta2 after =====>"+delta2);
-						 
-						 newWeights.add(newNodeWeight);
-						 newGradients.add(newNodeGradient);
-						 newLastGradients.add(newNodeLastGradient);
-						 newRpropLastDeltas.add(newRpropLastDelta); 
+						 }	  
 					 }
-					 layers.get(k).getNodes().get(l).getWeights().clear();
-					 layers.get(k).getNodes().get(l).setWeights(newWeights);
-
-					 layers.get(k).getNodes().get(l).getGradients().clear();
-					 layers.get(k).getNodes().get(l).setGradients(newGradients);
-					 
-					 layers.get(k).getNodes().get(l).getLastGradients().clear();
-					 layers.get(k).getNodes().get(l).setLastGradients(newLastGradients);
-					 
-					 layers.get(k).getNodes().get(l).getRpropLastDeltas().clear();
-					 layers.get(k).getNodes().get(l).setRpropLastDeltas(newRpropLastDeltas);
+					 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////		 
 				 }
 			}
 		}
-	}
-
-	
+	}		
+ 
  
 	
-	
-	public void printNNStructure(String title) {
-		System.out.println();
-		System.out.println();
-		System.out.println();
-		System.out.println();
-		System.out.println("=================================== START: <<< "+title.toUpperCase()+" >>>=======================================");
-		System.out.println("===================================================================================================================");
-		for(IqLayer layer : layers) {
-			System.out.println("layer **************"+ layers.indexOf(layer));
-			for(IqNode node : layer.getNodes()) {
-				if(   layers.indexOf(layer) == 0 || layers.indexOf(layer) == (layers.size() - 1)  ) {
-					System.out.println("node number " + layer.getNodes().indexOf(node));
-					System.out.println("	node  value " + node.getValue());
-					System.out.println("		node error " + node.getError());
-					System.out.println(" 			layerWeights = ");  
-					if(node.getWeights() != null) {
-						int counter = 0;
-						for(Double currentWeight : node.getWeights()) {
-							System.out.println("				layerWeight "+counter +" =|= "+currentWeight);
-							counter++;
-						}
-					}
-					
-					System.out.println("			layerGradients = ");  
-					if(node.getWeights() != null) {
-						int counter = 0;
-						for(Double currentGradient : node.getGradients()) {
-							System.out.println("				layerGradient "+counter +" =|= "+currentGradient);
-							counter++;
-						}
-					}
-					/*
-					System.out.println("			layerLastGradients = ");  
-					if(node.getWeights() != null) {
-						int counter = 0;
-						for(Double currentlayerLastGradient : node.getLastGradients()) {
-							System.out.println("				layerLastGradient "+counter +" =|= "+currentlayerLastGradient);
-							counter++;
-						}
-					}
-					
-					System.out.println("			layerRpropLastDeltas = ");  
-					if(node.getWeights() != null) {
-						int counter = 0;
-						for(Double currentRpropLastDelta : node.getRpropLastDeltas()) {
-							System.out.println("				rpropLastDeltas "+counter +" =|= "+currentRpropLastDelta);
-							counter++;
-						}
-					}
-					*/
-				}
+ 
+
+	public void backPropagateErrorWithRPROP_DEBUG(double[] nnOutput, double[] nnExpectedOutputs) {
+		for(int i=0 ;i < layers.getLast().getNodes().size()/* - 1*/; i++) {//-1 accounts for disregarding bias node
+			double currentErrorDelta = 0;
+			currentErrorDelta = layers.getLast().getNodes().get(i).getValue();
+			currentErrorDelta = currentErrorDelta*(1 - currentErrorDelta)*(nnExpectedOutputs[i] - currentErrorDelta);
+ 
+			layers.getLast().getNodes().get(i).setError(currentErrorDelta);
+
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for(int j = 0 ; j < layers.getLast().getNodes().get(i).getWeights().size(); j++) {
+				double myGradient = layers.getLast().getNodes().get(i).getGradients().get(j).doubleValue();
+				double myLastGradient = layers.getLast().getNodes().get(i).getLastGradients().get(j).doubleValue();
+				double myPropLastDelta = layers.getLast().getNodes().get(i).getRpropLastDeltas().get(j).doubleValue();
+				
+				
+				int layersSize = layers.size() - 1;
+				
+				double myWeight = layers.getLast().getNodes().get(i).getWeights().get(j).doubleValue();
+				myGradient += (layers.getLast().getNodes().get(i).getError()) * layers.get(layersSize - 1).getNodes().get(j).getValue();
+				layers.getLast().getNodes().get(i).getGradients().set(j,myGradient);
+ 
+				if(this.trainingBatchIndex == 3) {
+					System.out.println();
+					System.out.println();
+					System.out.println("*************************************************************************************************************************");
+					System.out.println("111 index ====> "+this.trainingBatchIndex+" || myGradient ====> "+myGradient+" || myLastGradient ====> "+myLastGradient);
+					////////////////////////////////////////////////////////////////////////////
+					final int change1 = IqNeuralNetworkMath.sign(myGradient * myLastGradient);
+					System.out.println("change1 ======>"+change1);
+	                double weightChange1 = 0;
+	                double delta1;
+	                System.out.println("myPropLastDelta before "+myPropLastDelta);
+
+	                if (change1 > 0) {
+	                        delta1 = myPropLastDelta * 1.2;
+	                        delta1 = Math.min(delta1, 50); 
+	                        
+	                        System.out.println("change1 >0 ===> MAX delta1 = 1.2*myPropLastDelta == "+myPropLastDelta);
+	                } else  {
+	                        delta1 = myPropLastDelta * 0.5;
+	                        delta1 = Math.max(delta1, 0.000001);
+	                        myLastGradient = 0;
+	                        
+	                        System.out.println("change1 else ===> MIN delta1 = 0.5*myPropLastDelta == "+myPropLastDelta);
+	                } 
+	                
+	                System.out.println("delta1=====>"+delta1);
+	                myLastGradient = myGradient;
+	                weightChange1 =  IqNeuralNetworkMath.sign(myGradient) * delta1;
+	                System.out.println("weightChange ==> "+weightChange1+" delta1 == "+delta1+" oldweight = "+myWeight);
+	                myWeight += weightChange1;
+	                layers.getLast().getNodes().get(i).getWeights().set(j,myWeight);
+	                System.out.println("oldweight + weightChange ==> "+myWeight);
+	                myPropLastDelta = delta1;
+	                
+	                layers.getLast().getNodes().get(i).getGradients().set(j,0.0);
+	                layers.getLast().getNodes().get(i).getLastGradients().set(j,myLastGradient);
+	                layers.getLast().getNodes().get(i).getRpropLastDeltas().set(j,myPropLastDelta);
+					////////////////////////////////////////////////////////////////////////////	
+	                System.out.println("aaa index ====> "+this.trainingBatchIndex+" || myGradient ====> "+myGradient+" || myLastGradient ====> "+myLastGradient);
+		            System.out.println("*************************************************************************************************************************");
+		            System.out.println();
+					System.out.println();
+				 }
 			}
-			//System.out.println("layer output = " + layer.getLayerOutput());
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		}
-		System.out.println("===================================================================================================================");
-		System.out.println("=================================== END: <<< "+title.toUpperCase()+" >>>=======================================");
-		System.out.println();
-		System.out.println();
-		System.out.println();
-		System.out.println();
+ 
+		
+		for(int k = (layers.size() - 2 ); k >=0 ; k--) {//looping trough middle hidden layers
+			if(layers.listIterator(k).hasPrevious() == true) {
+				 for(int l = 0; l < layers.get(k).getNodes().size(); l++) {//looping trough nodes of layer
+					 double deltaNodeError = 0;
+					 deltaNodeError = layers.get(k).getNodes().get(l).getValue();
+					 deltaNodeError *= 1 - deltaNodeError;
+					 double newSigmaOfWxDeltaErrors = 0;
+					 for(int m = 0; m < layers.get(k + 1).getNodes().size(); m++) {//looping trough next layer nodes
+						 newSigmaOfWxDeltaErrors += layers.get(k + 1).getNodes().get(m).getWeights().get(l).doubleValue() * layers.get(k+1).getNodes().get(m).getError();
+					 }
+					 
+					 deltaNodeError *= newSigmaOfWxDeltaErrors;
+					 
+					 layers.get(k).getNodes().get(l).setError(deltaNodeError);
+
+					 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					 for(int n = 0; n < layers.get(k).getNodes().get(l).getWeights().size(); n++) {
+						 double newNodeGradient = layers.get(k).getNodes().get(l).getGradients().get(n).doubleValue();
+						 double newNodeWeight = layers.get(k).getNodes().get(l).getWeights().get(n).doubleValue();
+						 
+						 double newNodeLastGradient = layers.get(k).getNodes().get(l).getLastGradients().get(n).doubleValue();
+						 double newRpropLastDelta = layers.get(k).getNodes().get(l).getRpropLastDeltas().get(n).doubleValue();		
+						 
+ 
+						 newNodeGradient += layers.get(k).getNodes().get(l).getError()*layers.get(k-1).getNodes().get(n).getValue();
+						 layers.get(k).getNodes().get(l).getGradients().set(n,newNodeGradient);
+						 
+						 if(this.trainingBatchIndex == 3) {
+							 System.out.println();
+							 System.out.println();
+							 System.out.println("	*************************************************************************************************************************");
+							 System.out.println("	222 index ====> "+this.trainingBatchIndex+" || newNodeGradient ====> "+newNodeGradient+" || newNodeLastGradient ====> "+newNodeLastGradient);
+						 	 ////////////////////////////////////////////////////////////////////////////
+							    final int change2 = IqNeuralNetworkMath.sign(newNodeGradient * newNodeLastGradient);
+							    System.out.println("	>>>>>>>>>>>>>>>>>delta2======>"+change2);
+				                double weightChange2 = 0;
+				                double delta2;
+				                System.out.println("	newRpropLastDelta before "+newRpropLastDelta);
+
+				                if (change2 > 0) {
+				                	 	delta2 = newRpropLastDelta * 1.2;
+				                        delta2 = Math.min(delta2, 50);   
+				                        
+				                        System.out.println("	>>>>>>>>>>>>>>>>>change2 >0 ===> MAX delta2 = 1.2*newRpropLastDelta == "+newRpropLastDelta);
+				                } else  {
+				                        delta2 = newRpropLastDelta * 0.5;
+				                        delta2 = Math.max(delta2, 0.000001);
+				                        newNodeLastGradient =0;
+				                        
+				                        System.out.println("	>>>>>>>>>>>>>>>>>change2 else ===> MIN delta2 = 0.5*newRpropLastDelta == "+newRpropLastDelta);
+				                }
+
+				                newNodeLastGradient = newNodeGradient;
+				                weightChange2 = IqNeuralNetworkMath.sign(newNodeGradient) * delta2;
+				                System.out.println("	weightChange ==> "+weightChange2+" delta2 == "+delta2+" oldweight = "+newNodeWeight);
+				                newNodeWeight += weightChange2;
+				                layers.get(k).getNodes().get(l).getWeights().set(n,newNodeWeight);
+				                System.out.println("	oldweight + weightChange ==> "+newNodeWeight);
+				                newRpropLastDelta = delta2;
+				                
+				                layers.get(k).getNodes().get(l).getGradients().set(n,0.0);
+				                layers.get(k).getNodes().get(l).getLastGradients().set(n,newNodeLastGradient);
+				                layers.get(k).getNodes().get(l).getRpropLastDeltas().set(n,newRpropLastDelta);
+							 ////////////////////////////////////////////////////////////////////////////	
+				             System.out.println("	bbb index ====> "+this.trainingBatchIndex+" || newNodeGradient ====> "+newNodeGradient+" || newNodeLastGradient ====> "+newNodeLastGradient);
+				             System.out.println("	*************************************************************************************************************************");
+				             System.out.println();
+							 System.out.println();
+						 }	  
+					 }
+					 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////		 
+				 }
+			}
+		}
+	}		
+	
+	
+	
+	
+	private double updateWeightRPROP() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public void printNNStructure(String title) {
+		//System.out.println("this.globalIndex***************** "+this.globalIndex+" || this.nnTrainingEpoches - 100***************** " +(this.nnTrainingEpoches - 100));
+		if(this.globalIndex == (this.nnTrainingEpoches - 1)) {
+			System.out.println();
+			System.out.println();
+			System.out.println();
+			System.out.println();
+			System.out.println("=================================== START: <<< "+title.toUpperCase()+" >>>=======================================");
+			System.out.println("===================================================================================================================");
+			for(IqLayer layer : layers) {
+				System.out.println("layer **************"+ layers.indexOf(layer));
+				for(IqNode node : layer.getNodes()) {
+					if(   layers.indexOf(layer) == 0 || layers.indexOf(layer) == (layers.size() - 1) ) {
+						System.out.println("node number " + layer.getNodes().indexOf(node));
+						System.out.println("	node  value " + node.getValue());
+						System.out.println("		node error " + node.getError());
+						System.out.println(" 			layerWeights = ");  
+						if(node.getWeights() != null) {
+							int counter = 0;
+							for(Double currentWeight : node.getWeights()) {
+								System.out.println("				layerWeight "+counter +" =|= "+currentWeight);
+								counter++;
+							}
+						}
+						
+						System.out.println("			layerGradients = ");  
+						if(node.getWeights() != null) {
+							int counter = 0;
+							for(Double currentGradient : node.getGradients()) {
+								System.out.println("				layerGradient "+counter +" =|= "+currentGradient);
+								counter++;
+							}
+						}
+						 
+						System.out.println("			layerLastGradients = ");  
+						if(node.getWeights() != null) {
+							int counter = 0;
+							for(Double currentlayerLastGradient : node.getLastGradients()) {
+								System.out.println("				layerLastGradient "+counter +" =|= "+currentlayerLastGradient);
+								counter++;
+							}
+						}
+						
+						System.out.println("			layerRpropLastDeltas = ");  
+						if(node.getWeights() != null) {
+							int counter = 0;
+							for(Double currentRpropLastDelta : node.getRpropLastDeltas()) {
+								System.out.println("				rpropLastDeltas "+counter +" =|= "+currentRpropLastDelta);
+								counter++;
+							}
+						}
+						 
+					}
+				}
+				//System.out.println("layer output = " + layer.getLayerOutput());
+			}
+			System.out.println("===================================================================================================================");
+			System.out.println("=================================== END: <<< "+title.toUpperCase()+" >>>=======================================");
+			System.out.println();
+			System.out.println();
+			System.out.println();
+			System.out.println();
+		}
 	}
 	
 	
@@ -577,4 +649,3 @@ public class IqNeuralNetwork implements java.io.Serializable {
 	}
 	
 }
-
